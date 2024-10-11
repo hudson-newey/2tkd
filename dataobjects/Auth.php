@@ -2,9 +2,10 @@
 /**
  * Table Definition for auth
  */
-require_once 'DB/DataObject.php';
+require_once 'vendor/autoload.php';
+use DB;
 
-class DataObjects_Auth extends DB_DataObject 
+class DataObjects_Auth extends DB 
 {
     ###START_AUTOCODE
     /* the code below is auto generated do not remove the above tag */
@@ -23,7 +24,7 @@ class DataObjects_Auth extends DB_DataObject
     public $last_updated;                    // datetime(19)  not_null binary
 
     /* Static get */
-    function staticGet($k,$v=NULL) { return DB_DataObject::staticGet('DataObjects_Auth',$k,$v); }
+    function staticGet($k,$v=NULL) { return DB::staticGet('DataObjects_Auth',$k,$v); }
 
     /* the code above is auto generated do not remove the tag below */
     ###END_AUTOCODE

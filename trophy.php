@@ -17,7 +17,9 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 require_once('tournament_settings.php');
-require 'libs/Smarty.class.php';
+require 'vendor/autoload.php';
+use Smarty\Smarty;
+use DB;
 $smarty = new Smarty;
 require 'loginlogout.php';
 require 'configDB.php';
@@ -27,9 +29,9 @@ $smarty->assign('current_menu', "Admin");
 
 
 	// for getting get all the events for the active tournament.
- 	$tournament_events_list = DB_DataObject::factory('tournament_events');
+ 	$tournament_events_list = DB::factory('tournament_events');
  	$tournament_events_list->tournament_id = $active_tournament->tournament_id;
-	$events = DB_DataObject::factory('events');
+	$events = DB::factory('events');
 	$tournament_events_list->selectAs();
 	$tournament_events_list->joinAdd($events, "INNER", 'events', 'event_id');
 	$tournament_events_list->selectAs($events, 'events_%s'); 	
@@ -41,7 +43,7 @@ $smarty->assign('current_menu', "Admin");
  	while ($tournament_events_list->fetch()) {
 		  
 	   	// for getting all the divisions in each active event
-	  	$tournament_divisions = DB_DataObject::factory('divisions');	  
+	  	$tournament_divisions = DB::factory('divisions');	  
 	   	$tournament_divisions->tournament_id = $active_tournament->tournament_id;
 	   	$tournament_divisions->event_id = $tournament_events_list->event_id;
 	   	if (isset($_GET["SECTION"]) && $_GET["SECTION"] != 0) {

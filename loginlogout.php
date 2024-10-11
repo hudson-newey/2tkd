@@ -18,8 +18,6 @@
 */
 require_once('tournament_settings.php');
 
-require_once('DB/DataObject.php');
-
 require 'configDB.php';
 require_once('Auth/Auth.php');
 
@@ -66,7 +64,7 @@ if ($a->checkAuth()) {
 
    $smarty->assign('username', $a->getUsername());
    
-   $user = DB_DataObject::factory('auth');
+   $user = DB::factory('auth');
 
 	$user->username = $a->getUsername();
 	$user->find();

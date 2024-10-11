@@ -17,7 +17,9 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 require_once('tournament_settings.php');
-require 'libs/Smarty.class.php';
+require 'vendor/autoload.php';
+use Smarty\Smarty;
+use DB;
 $smarty = new Smarty;
 require 'loginlogout.php';
 require 'configDB.php';
@@ -28,18 +30,18 @@ if ($user_access != "admin" && $user_access != "manager") {
 $smarty->assign('current_menu', "Registration");
 require 'utility.php';
 
-//DB_DataObject::debugLevel(5);
+//DB::debugLevel(5);
 // need to test that this person is a manager and can see/edit this persons details
 // ie for if they attempt to edit the url
 if ($user_access == "manager" && isset($_GET["ID"]) && $_GET["ID"] != "new") {
 	
-	$competitors = DB_DataObject::factory('competitors');
+	$competitors = DB::factory('competitors');
 	$competitors->whereAdd("tournament_id = ".$competitors->escape($active_tournament->tournament_id));
 	$competitors->competitor_id = $competitors->escape($_GET["ID"]);
 	$competitors->find();
 	$competitors->fetch();
 	
-	$auth_represents_connection = DB_DataObject::factory('auth_represents_connection');
+	$auth_represents_connection = DB::factory('auth_represents_connection');
  	
  	$auth_represents_connection->whereAdd("represents_id = ".$competitors->represents_id);
  	$auth_represents_connection->whereAdd("tournament_id = ".$active_tournament->tournament_id); 	// zzz
@@ -76,7 +78,7 @@ if(isset($_POST["Submit"])) {
 		$primary = "Competitor has not been added/updated because: ";
 		$smarty->assign(array('primary' => $primary, 'level' => "error")); 
 	} else if ($_POST["ID"] == "new") {
-		$competitor = DB_DataObject::factory('competitors');
+		$competitor = DB::factory('competitors');
 		$competitor->tournament_id = $active_tournament->tournament_id;
 		$competitor->enrolment = "Registered";
 		$competitor->title = strip_tags($_POST["Title"]);
@@ -106,7 +108,7 @@ if(isset($_POST["Submit"])) {
 		
 		$competitor->overall_place = 0;
 		$competitor->overall_description = "";
-//	DB_DataObject::debugLevel(5);						
+//	DB::debugLevel(5);						
 		if (!($new_id = $competitor->insert())) {
 			$primary = "Competitor has not been added";
 			$smarty->assign(array('primary' => $primary, 'level' => "error")); 
@@ -114,9 +116,9 @@ if(isset($_POST["Submit"])) {
 			$primary = "Competitor (".$new_id.") has been added";
 			$smarty->assign(array('primary' => $primary, 'level' => "success"));  
 		}	
-//	DB_DataObject::debugLevel(0);
+//	DB::debugLevel(0);
 	} else {
-		$competitor = DB_DataObject::factory('competitors');
+		$competitor = DB::factory('competitors');
 		$competitor->get($_POST["ID"]);
 		$competitor->enrolment = $_POST["Enrolment"];
 		$competitor->title = strip_tags($_POST["Title"]);
@@ -173,28 +175,28 @@ if(isset($_POST["Submit"])) {
 		next($_POST["Events"]);
 	}		
 	
-	$tournament_events_list = DB_DataObject::factory('tournament_events');
+	$tournament_events_list = DB::factory('tournament_events');
 	$tournament_events_list->tournament_id = $active_tournament->tournament_id;
 	$tournament_events_list->find();
 	
 	while ($tournament_events_list->fetch()) {
 		if (isset($user_events[$tournament_events_list->event_id])) {
-			$competitor_events = DB_DataObject::factory('competitor_events');	
+			$competitor_events = DB::factory('competitor_events');	
 			$competitor_events->query("SELECT * FROM {$competitor_events->__table} WHERE competitor_id = '".$edit_id."' AND event_id = '".$tournament_events_list->event_id."'");
 			if (!$competitor_events->fetch()) {
-				$competitor_events = DB_DataObject::factory('competitor_events');	
+				$competitor_events = DB::factory('competitor_events');	
 				$competitor_events->competitor_id = $edit_id;
 				$competitor_events->event_id = $tournament_events_list->event_id;
 				$competitor_events->division_id = 0;	
 				$competitor_events->insert();				
 			}
 		} else {
-			$competitor_events = DB_DataObject::factory('competitor_events');	
+			$competitor_events = DB::factory('competitor_events');	
 			$competitor_events->query("SELECT * FROM {$competitor_events->__table} WHERE competitor_id = ".$edit_id." AND event_id = ".$tournament_events_list->event_id);
 			if ($competitor_events->fetch()) {
 				
 				// don't delete the event if it is a team event
-				$events = DB_DataObject::factory('events');
+				$events = DB::factory('events');
 				$events->event_id = $tournament_events_list->event_id;
 				$events->find();
 				$events->fetch();
@@ -223,7 +225,7 @@ if(isset($_POST["Submit"])) {
 	
 	$smarty->clear_cache('registration.tpl');
 	
-	$competitor = DB_DataObject::factory('competitors');
+	$competitor = DB::factory('competitors');
 	$competitor->get($_POST["ID"]);
 	if (!$competitor->delete()) {
 		$primary = "Competitor (".$_POST["ID"].") has not been deleted";
@@ -240,7 +242,7 @@ if (isset($_POST["Delete"]) && $delete_success == true) {
 
 	$smarty->assign('delete_success', $delete_success);
 	
-	$tournament_events_list = DB_DataObject::factory('tournament_events');
+	$tournament_events_list = DB::factory('tournament_events');
 	$tournament_events_list->tournament_id = $active_tournament->tournament_id;
 	$tournament_events_list->find();
 	
@@ -251,7 +253,7 @@ if (isset($_POST["Delete"]) && $delete_success == true) {
 	// also need to remove them from any teams
 	// TODO: Check to see if this makes the team empty and warn the user
 	for ($id = 1; $id < 7; $id++) {
-		$competitors = DB_DataObject::factory('competitors');
+		$competitors = DB::factory('competitors');
 		$competitors->query("UPDATE {$competitors->__table} SET team_competitor_id".(string)$id." = 0 WHERE team_competitor_id".(string)$id." = ".$_POST["ID"]);
 	}
 	
@@ -266,7 +268,7 @@ if (isset($_POST["Delete"]) && $delete_success == true) {
 		$command = "Edit details and submit, delete, or <a href=\"edit_competitor.php?ID=new\">add new competitor</a>.";
 		$smarty->assign("command", $command); 
 //	}
-	$competitor = DB_DataObject::factory('competitors');
+	$competitor = DB::factory('competitors');
 	if (isset($_POST["ID"]) && $_POST["ID"] == "new") {
 		$competitor->competitor_id = $new_id;
 	} else {
@@ -298,7 +300,7 @@ if (isset($_POST["Delete"]) && $delete_success == true) {
 	       ));
 	
 //     if (!(isset($_POST["ID"]) && $_POST["ID"] == "new")) {
-		$competitor_events = DB_DataObject::factory('competitor_events');
+		$competitor_events = DB::factory('competitor_events');
 		$competitor_events->competitor_id = $competitor->competitor_id;
 		$competitor_events->find();
 		$temp_selection_array = array();
@@ -308,10 +310,10 @@ if (isset($_POST["Delete"]) && $delete_success == true) {
 		
 		// what team events are they in
 		$i = 0;
-		$competitor_events = DB_DataObject::factory('competitor_events'); 		
+		$competitor_events = DB::factory('competitor_events'); 		
 		while (isset($active_tournament_events_id[$i])) {	
 			if ($temp_selection_team_event[$i]) {		
-				$team_competitor = DB_DataObject::factory('competitors');
+				$team_competitor = DB::factory('competitors');
 				$team_competitor->tournament_id = $active_tournament->tournament_id;
 				$team_competitor->whereAdd("competitor_count > 0");
 				$team_competitor->find();	
@@ -346,11 +348,11 @@ if (isset($competitor))  {
 
   	$temp_array = array();
   	$temp_array_team = array();
- 	$tournament_events_list = DB_DataObject::factory('tournament_events');
+ 	$tournament_events_list = DB::factory('tournament_events');
  	$tournament_events_list->tournament_id = $active_tournament->tournament_id;
 
 
-	$events = DB_DataObject::factory('events');
+	$events = DB::factory('events');
 	$tournament_events_list->selectAs();
 	$tournament_events_list->joinAdd($events, "INNER", 'events', 'event_id');
 	$tournament_events_list->selectAs($events, 'events_%s'); 	
@@ -372,7 +374,7 @@ if (isset($competitor))  {
 	// the rank combo box
 
   	$temp_array = array();
- 	$rank_list = DB_DataObject::factory('rank');
+ 	$rank_list = DB::factory('rank');
  	$rank_list->orderBy('rank_id');
  	$rank_list->find();
  	while ($rank_list->fetch())
@@ -381,9 +383,9 @@ if (isset($competitor))  {
    
  
  		// gets a list of possible represents
-		$auth_represents_connection = DB_DataObject::factory('auth_represents_connection');
+		$auth_represents_connection = DB::factory('auth_represents_connection');
  		$auth_represents_connection->whereAdd("tournament_id = ".$active_tournament->tournament_id); 	// zzz		
-		$represents = DB_DataObject::factory('represents');
+		$represents = DB::factory('represents');
 		$auth_represents_connection->selectAs();
 		$auth_represents_connection->joinAdd($represents, "INNER", 'represents', 'represents_id');
 		$auth_represents_connection->selectAs($represents, 'represents_%s');

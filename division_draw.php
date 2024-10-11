@@ -17,7 +17,9 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 require_once('tournament_settings.php');
-require 'libs/Smarty.class.php';
+require 'vendor/autoload.php';
+use Smarty\Smarty;
+use DB;
 $smarty = new Smarty;
 require 'loginlogout.php';
 require 'configDB.php';
@@ -48,7 +50,7 @@ $competitor_list_id = Get_Competitor_IDs_Division($_GET["DIVISION_ID"]);
 $competitors_in_draw = count($competitor_list_id);
 $smarty->assign("competitors_in_draw", $competitors_in_draw);
 
-$division = DB_DataObject::factory('divisions');
+$division = DB::factory('divisions');
 $division->division_id = $_GET["DIVISION_ID"];
 $division->find();
 $division->fetch();
@@ -119,13 +121,13 @@ if ($division->type == "Form_Individual" || $division->type == "Form_Team") {
 	
 	while ($round < $competitors_in_draw + 1) {
 
-		$results = DB_DataObject::factory('results');
+		$results = DB::factory('results');
 		$results->division_id = $_GET["DIVISION_ID"];		
 		$results->round_id = $round;
 		$results->find();				
 		$results->fetch();
 		
-		$competitor = DB_DataObject::factory('competitors');
+		$competitor = DB::factory('competitors');
 		$competitor->competitor_id = $results->competitor_red_id;
 		$competitor->find();
 		$competitor->fetch();
@@ -172,7 +174,7 @@ if ($division->type == "Form_Individual" || $division->type == "Form_Team") {
 			$extra_rounds = 0;
 			
 		for ($i = 1; $i < $competitors_in_draw * ($competitors_in_draw - 1)/2 + 1 + $extra_rounds; $i++) {
-			$stored_result[$i] = DB_DataObject::factory('results');
+			$stored_result[$i] = DB::factory('results');
 			$stored_result[$i]->division_id = $_GET["DIVISION_ID"];	
 			$stored_result[$i]->round_id = $i;
 			$stored_result[$i]->find();
@@ -188,7 +190,7 @@ if ($division->type == "Form_Individual" || $division->type == "Form_Team") {
 			
 		for ($round = 1; $round < $competitors_in_draw * ($competitors_in_draw - 1)/2 + 1 + $extra_rounds; $round++) {
   
-			$results = DB_DataObject::factory('results');
+			$results = DB::factory('results');
 			$results->division_id = $_GET["DIVISION_ID"];		
 			$results->round_id = $round;
 			
@@ -234,7 +236,7 @@ if ($division->type == "Form_Individual" || $division->type == "Form_Team") {
 		
 		while ($round < $competitors_in_draw * ($competitors_in_draw - 1)/2 + 1) {
 	
-			$results = DB_DataObject::factory('results');
+			$results = DB::factory('results');
 			$results->division_id = $_GET["DIVISION_ID"];		
 			$results->round_id = $round;
 			$results->find();				
@@ -276,7 +278,7 @@ if ($division->type == "Form_Individual" || $division->type == "Form_Team") {
 		
 		
 		for ($round = 1, $competitor = 0; $competitor < $competitors_in_draw; $competitor++, $round = $round + floor($competitors_in_draw/2)) {
-			$results = DB_DataObject::factory('results');
+			$results = DB::factory('results');
 			$results->division_id = $_GET["DIVISION_ID"];		
 			$results->round_id = $round;
 			$results->find();				
@@ -331,7 +333,7 @@ for ($i = $round_count_lookup[$competitors_in_draw]; $i > 0; $i--) {
 	}
 	
 	// get when the division was last updated, by who, and what the result was
-	$results = DB_DataObject::factory('results');
+	$results = DB::factory('results');
 	$results->division_id = $_GET["DIVISION_ID"];		
 	$results->round_id = $i;
 	$results->find();				
@@ -353,7 +355,7 @@ if ($division->type == "Repercharge") {
 		}
 		
 		// get when the division was last updated, by who, and what the result was
-		$results = DB_DataObject::factory('results');
+		$results = DB::factory('results');
 		$results->division_id = $_GET["DIVISION_ID"];		
 		$results->round_id = $i;
 		$results->find();				
@@ -529,7 +531,7 @@ if (isset($_POST["Submit"])) {
 		$round = 1;
 		while ($round < $round_count_lookup[$competitors_in_draw] + 1 ) {
 
-			$results = DB_DataObject::factory('results');
+			$results = DB::factory('results');
 			$results->division_id = $_GET["DIVISION_ID"];		
 			$results->round_id = $round;
 			$results->find();				
@@ -590,7 +592,7 @@ if (isset($_POST["Submit"])) {
 			$round = 101;
 			while ($round < $loser_round_count_lookup[$competitors_in_draw] + 101 ) {
 			
-				$results = DB_DataObject::factory('results');
+				$results = DB::factory('results');
 				$results->division_id = $_GET["DIVISION_ID"];		
 				$results->round_id = $round;
 				$results->find();				

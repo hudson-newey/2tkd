@@ -17,7 +17,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 require_once('tournament_settings.php');
-require 'libs/Smarty.class.php';
+require 'vendor/autoload.php';
+use Smarty\Smarty;
 $smarty = new Smarty;
 require 'loginlogout.php';
 require 'configDB.php';

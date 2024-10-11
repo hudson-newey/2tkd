@@ -17,7 +17,9 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 require_once('tournament_settings.php');
-require 'libs/Smarty.class.php';
+require 'vendor/autoload.php';
+use Smarty\Smarty;
+use DB;
 $smarty = new Smarty;
 require 'loginlogout.php';
 if ($user_access != "admin") {
@@ -26,7 +28,6 @@ if ($user_access != "admin") {
 }
 $smarty->assign('current_menu', "Admin");
 
-require_once('DB/DataObject.php');
 require 'configDB.php';
 require 'utility.php';
 
@@ -34,11 +35,11 @@ require 'utility.php';
 
 
 if(isset($_POST["Copy_Divisions"])) {
-	$divisions = DB_DataObject::factory('divisions');
+	$divisions = DB::factory('divisions');
 	$divisions->tournament_id = current($_POST["Tournaments"]);
 	$divisions->find();
 	while ($divisions->fetch()) {
-		$division = DB_DataObject::factory('divisions');
+		$division = DB::factory('divisions');
 		$division = $divisions;
 		$division->tournament_id = $active_tournament->tournament_id;
 		$division->section_id = 0;	
@@ -54,9 +55,9 @@ $smarty->assign('tournaments_list', Get_Tournament_List());
    
 
 
-$divisions = DB_DataObject::factory('divisions');
+$divisions = DB::factory('divisions');
 $divisions->tournament_id = $active_tournament->tournament_id;
-$events = DB_DataObject::factory('events');
+$events = DB::factory('events');
 
 $divisions->selectAs();
 $divisions->joinAdd($events, "INNER", 'events', 'event_id');

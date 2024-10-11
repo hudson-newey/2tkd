@@ -17,7 +17,9 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 require_once('tournament_settings.php');
-require 'libs/Smarty.class.php';
+require 'vendor/autoload.php';
+use Smarty\Smarty;
+use DB;
 $smarty = new Smarty;
 require 'loginlogout.php';
 if ($user_access != "admin") {
@@ -26,7 +28,6 @@ if ($user_access != "admin") {
 }
 $smarty->assign('current_menu', "Admin");
 
-require_once('DB/DataObject.php');
 require 'configDB.php';
 require 'utility.php';
 
@@ -35,7 +36,7 @@ echo "<br><br><br><br>";
 
 if (isset($_POST["Check_Divisions"])) {
 	
-	$user = DB_DataObject::factory('auth');		
+	$user = DB::factory('auth');		
 	$user->active = 1;
 	$user->find();
 	while ($user->fetch()) {
@@ -44,11 +45,11 @@ if (isset($_POST["Check_Divisions"])) {
 }
 
 if(isset($_POST["Copy_Represents"])) {
-	$auth_represents_connections = DB_DataObject::factory('auth_represents_connection');
+	$auth_represents_connections = DB::factory('auth_represents_connection');
 	$auth_represents_connections->whereAdd("tournament_id = ".current($_POST["Tournaments"]));	// zzz	
 	$auth_represents_connections->find();
 	while 	($auth_represents_connections->fetch()) {
-		$auth_represents_connection = DB_DataObject::factory('auth_represents_connection');
+		$auth_represents_connection = DB::factory('auth_represents_connection');
 		$auth_represents_connection = $auth_represents_connections;
 		$auth_represents_connection->tournament_id = $active_tournament->tournament_id;
 		$auth_represents_connection->insert();	
@@ -57,13 +58,13 @@ if(isset($_POST["Copy_Represents"])) {
 }
 
 
-//DB_DataObject::debugLevel(0);
+//DB::debugLevel(0);
 
-$user = DB_DataObject::factory('auth');
+$user = DB::factory('auth');
 
-$auth_represents_connection = DB_DataObject::factory('auth_represents_connection');
+$auth_represents_connection = DB::factory('auth_represents_connection');
 $auth_represents_connection->whereAdd("tournament_id = ".$active_tournament->tournament_id);	// zzz
-$represents = DB_DataObject::factory('represents');
+$represents = DB::factory('represents');
 $auth_represents_connection->selectAs();
 $auth_represents_connection->joinAdd($represents, "INNER", 'represents', 'represents_id');
 $auth_represents_connection->selectAs($represents, 'represents_%s');

@@ -17,7 +17,9 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 require_once('tournament_settings.php');
-require 'libs/Smarty.class.php';
+require 'vendor/autoload.php';
+use Smarty\Smarty;
+use DB;
 $smarty = new Smarty;
 require 'loginlogout.php';
 require 'configDB.php';
@@ -29,7 +31,7 @@ if (isset($_GET["SECTION"])) {
 	if ($section == 0) {
 		$smarty->assign('SECTION', "All");
 	} else {
-		$sections = DB_DataObject::factory('sections');
+		$sections = DB::factory('sections');
 		$sections->tournament_id = $active_tournament->tournament_id;
 		$sections->section_id = $section;
 		$sections->find();
@@ -43,16 +45,16 @@ if (isset($_GET["SECTION"])) {
 }
 
 
-$competitors = DB_DataObject::factory('competitors');
+$competitors = DB::factory('competitors');
 $competitors->whereAdd("tournament_id = ".$competitors->escape($active_tournament->tournament_id));
 
 
-$represents = DB_DataObject::factory('represents');
+$represents = DB::factory('represents');
 $competitors->selectAs();
 $competitors->joinAdd($represents, "INNER", 'represents', 'represents_id');
 $competitors->selectAs($represents, 'represent_%s');
 
-$ranks = DB_DataObject::factory('rank');
+$ranks = DB::factory('rank');
 $competitors->joinAdd($ranks, "INNER", 'rank', 'rank_id');
 $competitors->selectAs($ranks, 'rank_%s');
 
@@ -70,11 +72,11 @@ $competitors->find();
 	  // not that unassigned competitors will not be shown unless section = 0
 	  $competitor_in_section = 0;
 	  if ($section != 0) {
-		  $competitor_events = DB_DataObject::factory('competitor_events');
+		  $competitor_events = DB::factory('competitor_events');
 		  $competitor_events->competitor_id = $competitors->competitor_id;	  
 		  $competitor_events->find();
 		  while ($competitor_events->fetch() && !$competitor_in_section) {
-				$tournament_divisions = DB_DataObject::factory('divisions');
+				$tournament_divisions = DB::factory('divisions');
 				$tournament_divisions->tournament_id = $active_tournament->tournament_id;	
 				$tournament_divisions->section_id = $section;
 				$tournament_divisions->division_id = $competitor_events->division_id;
@@ -105,7 +107,7 @@ $competitors->find();
 			  'LAST_UPDATED' 	=> $competitors->last_updated  
 	       ));
 	
-	       	$competitor_events = DB_DataObject::factory('competitor_events');
+	       	$competitor_events = DB::factory('competitor_events');
 			$competitor_events->competitor_id = $competitors->competitor_id;
 	
 			$i = 0;

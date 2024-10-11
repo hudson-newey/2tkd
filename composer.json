@@ -1,5 +1,6 @@
 {
     "require": {
-        "smarty/smarty": "^5.4"
+        "smarty/smarty": "^5.4",
+        "pear/db": "^1.12"
     }
 }

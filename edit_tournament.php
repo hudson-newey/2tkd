@@ -17,7 +17,9 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 require_once('tournament_settings.php');
-require 'libs/Smarty.class.php';
+require 'vendor/autoload.php';
+use Smarty\Smarty;
+use DB;
 $smarty = new Smarty;
 require 'loginlogout.php';
 require 'configDB.php';
@@ -36,7 +38,7 @@ if(isset($_POST["Submit"])) {
 	$smarty->clear_cache('registration.tpl');
 	
 	if ($_POST["ID"] == "new") {
-		$tournament = DB_DataObject::factory('tournaments');
+		$tournament = DB::factory('tournaments');
 		$tournament->name = $_POST["Name"];
 		$tournament->location = $_POST["Location"];
 		$tournament->date_from = $_POST["From_Year"]."-".$_POST["From_Month"]."-".$_POST["From_Day"];
@@ -58,7 +60,7 @@ if(isset($_POST["Submit"])) {
 		} else {		
 			$primary = "Tournament (".$new_id.") has been added";
 			$smarty->assign(array('primary' => $primary, 'level' => "success"));  	
-			$tournament_events = DB_DataObject::factory('tournament_events');
+			$tournament_events = DB::factory('tournament_events');
 			$tournament_events->tournament_id = $new_id;
 			while ($temp_value = current($_POST["Events"])) {
 				$tournament_events->event_id = $temp_value;
@@ -69,7 +71,7 @@ if(isset($_POST["Submit"])) {
 				
 	} else {
 
-		$tournament = DB_DataObject::factory('tournaments');
+		$tournament = DB::factory('tournaments');
 		$tournament->get($_POST["ID"]);
 		$tournament->name = $_POST["Name"];
 		$tournament->location = $_POST["Location"];
@@ -86,13 +88,13 @@ if(isset($_POST["Submit"])) {
 		$tournament->tournament_form_pdf = $_POST["Tournament_Form_PDF"];				
 		$tournament->logo_name = $_POST["Logo_Name"];
 		 		 		
-		$tournament_events = DB_DataObject::factory('tournament_events');
+		$tournament_events = DB::factory('tournament_events');
 		$tournament_events->tournament_id = $_POST["ID"];
 		$tournament_events->find();
 		while ($tournament_events->fetch()) {
 			$tournament_events->delete();	
 		}
-		$tournament_events = DB_DataObject::factory('tournament_events');
+		$tournament_events = DB::factory('tournament_events');
 		$tournament_events->tournament_id = $_POST["ID"];
 		while ($temp_value = current($_POST["Events"])) {
 			$tournament_events->event_id = $temp_value;
@@ -119,7 +121,7 @@ if(isset($_POST["Submit"])) {
 	
 	$smarty->clear_cache('registration.tpl');
 	
-	$tournament = DB_DataObject::factory('tournaments');
+	$tournament = DB::factory('tournaments');
 	$tournament->get($_POST["ID"]);
 	if (!$tournament->delete()) {
 		$primary = "Tournament (".$_POST["ID"].") has not been deleted";
@@ -131,13 +133,13 @@ if(isset($_POST["Submit"])) {
 		
 		// also need to delete all the competitors that were in this tournament
 		
-		$competitors = DB_DataObject::factory('competitors');
+		$competitors = DB::factory('competitors');
 		$competitors->tournament_id = $_POST["ID"];
 		$competitors->find();
 		while ($competitors->fetch()) {			
 			
 			// and the competitor event entries
-			$competitor_events = DB_DataObject::factory('competitor_events');
+			$competitor_events = DB::factory('competitor_events');
 			$competitor_events->competitor_id = $competitors->competitor_id;
 			$competitor_events->find();
 			while($competitor_events->fetch()) {
@@ -148,13 +150,13 @@ if(isset($_POST["Submit"])) {
 		}		
 		
 		// and need to delete the divisions
-		$divisions = DB_DataObject::factory('divisions');
+		$divisions = DB::factory('divisions');
 		$divisions->tournament_id = $_POST["ID"];
 		$divisions->find();
 		while ($divisions->fetch()) {
 			
 			// and the results
-			$results = DB_DataObject::factory('results');
+			$results = DB::factory('results');
 			$results->division_id = $divisions->division_id;
 			$results->find();
 			while($results->fetch()) {
@@ -165,7 +167,7 @@ if(isset($_POST["Submit"])) {
 		}
 		
 		// and the sections
-		$sections = DB_DataObject::factory('sections');
+		$sections = DB::factory('sections');
 		$sections->tournament_id = $_POST["ID"];
 		$sections->find();
 		while ($sections->fetch()) {	
@@ -173,7 +175,7 @@ if(isset($_POST["Submit"])) {
 		}		
 		
 		// and the events
-		$tournament_events = DB_DataObject::factory('tournament_events');
+		$tournament_events = DB::factory('tournament_events');
 		$tournament_events->tournament_id = $_POST["ID"];
 		$tournament_events->find();
 		while ($tournament_events->fetch()) {	
@@ -199,7 +201,7 @@ if (isset($_POST["Delete"]) && $delete_success == true) {
 	$command = "Edit details and submit or delete.";
 	$smarty->assign("command", $command); 
 
-	$tournament = DB_DataObject::factory('tournaments');
+	$tournament = DB::factory('tournaments');
 	if (isset($_POST["ID"]) && $_POST["ID"] == "new") {
 		$tournament->tournament_id = $new_id;
 	} else {
@@ -226,7 +228,7 @@ if (isset($_POST["Delete"]) && $delete_success == true) {
 	       ));
 	
 	// get the events that are currently selected
-		$tournament_events = DB_DataObject::factory('tournament_events');
+		$tournament_events = DB::factory('tournament_events');
 		$tournament_events->tournament_id = $tournament->tournament_id;
 		$tournament_events->find();
 		$temp_selection_array = array();
@@ -244,7 +246,7 @@ if (isset($_POST["Delete"]) && $delete_success == true) {
 	
 	// get the different types of payment breakdown methods allowed
   	$temp_array = array();
- 	$payment_list = DB_DataObject::factory('payment');
+ 	$payment_list = DB::factory('payment');
  	$payment_list->orderBy('payment_id');
  	$payment_list->find();
  	while ($payment_list->fetch())
@@ -253,7 +255,7 @@ if (isset($_POST["Delete"]) && $delete_success == true) {
 
 	// get a list of all the possible events
   	$temp_array = array();
- 	$events_list = DB_DataObject::factory('events');
+ 	$events_list = DB::factory('events');
  	$events_list->orderBy('name');
  	$events_list->find();
  	while ($events_list->fetch())

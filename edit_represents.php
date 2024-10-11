@@ -17,7 +17,9 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 require_once('tournament_settings.php');
-require 'libs/Smarty.class.php';
+require 'vendor/autoload.php';
+use Smarty\Smarty;
+use DB;
 $smarty = new Smarty;
 require 'loginlogout.php';
 require 'configDB.php';
@@ -33,10 +35,10 @@ $delete_success = false;
 
 		
 if(isset($_POST["Submit"])) {
-// DB_DataObject::debugLevel(5);
+// DB::debugLevel(5);
 
 	if ($_POST["ID"] == "new") {
-		$represent = DB_DataObject::factory('represents');
+		$represent = DB::factory('represents');
 		$represent->name = strip_tags($_POST["Represents"]);
 		$represent->active = isset($_POST["Active"]);		
 		$represent->last_updated = date("Y-m-d H:i:s");
@@ -49,7 +51,7 @@ if(isset($_POST["Submit"])) {
 		}	
 				
 	} else {
-		$represent = DB_DataObject::factory('represents');
+		$represent = DB::factory('represents');
 		$represent->get($_POST["ID"]);
 		$represent->name = strip_tags($_POST["Represents"]);
 		$represent->active = isset($_POST["Active"]);		
@@ -64,7 +66,7 @@ if(isset($_POST["Submit"])) {
 	}
 
 } elseif (isset($_POST["Delete"])) {
-	$represent = DB_DataObject::factory('represents');
+	$represent = DB::factory('represents');
 	$represent->get($_POST["ID"]);
 	if (!$represent->delete()) {
 		$primary = "Represents (".$_POST["Represents"].") has not been deleted";
@@ -93,7 +95,7 @@ if (isset($_POST["Delete"]) && $delete_success == true) {
 		$smarty->assign("command", $command); 
 //	}
 
-	$represent = DB_DataObject::factory('represents');
+	$represent = DB::factory('represents');
 	if (isset($_POST["ID"]) && $_POST["ID"] == "new") {
 		$represent->represents_id = $new_id;
 	} else {

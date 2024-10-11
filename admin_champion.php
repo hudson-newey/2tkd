@@ -17,7 +17,9 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 require_once('tournament_settings.php');
-require 'libs/Smarty.class.php';
+require 'vendor/autoload.php';
+use Smarty\Smarty;
+use DB;
 $smarty = new Smarty;
 require 'loginlogout.php';
 if ($user_access != "admin") {
@@ -26,7 +28,6 @@ if ($user_access != "admin") {
 }
 $smarty->assign('current_menu', "Admin");
 
-require_once('DB/DataObject.php');
 require 'configDB.php';
 require 'utility.php';
 
@@ -35,12 +36,12 @@ echo "<br><br><br><br>";
 
 if (isset($_POST["Submit"])) {
 		
-	$competitors = DB_DataObject::factory('competitors');
+	$competitors = DB::factory('competitors');
 	$competitors->tournament_id = $active_tournament->tournament_id;
 	$competitors->find();
 	while ($competitors->fetch()) {
 		if (isset($_POST["Place".(string) $competitors->competitor_id])) {
-			$competitor = DB_DataObject::factory('competitors');
+			$competitor = DB::factory('competitors');
 			$competitor->get($competitors->competitor_id);
 			$competitor->overall_place = $_POST["Place".(string) $competitors->competitor_id];
 			$competitor->overall_description = $_POST["Description".(string) $competitors->competitor_id];
@@ -55,7 +56,7 @@ function Get_Form_Place($division_id, $competitor_id) {
 
 //		echo "GFP id: ".Get_Competitor_Name($competitor_id)." ".$division_id."<br>";
 
-		$results = DB_DataObject::factory('results');
+		$results = DB::factory('results');
 		$results->division_id = $division_id;
 		$results->competitor_red_id = $competitor_id;		
 		if ($results->find()) {				
@@ -69,7 +70,7 @@ function Get_Form_Place($division_id, $competitor_id) {
 
 function Get_Round_Place($division_id, $competitor_id, $minor_final) {
 
-		$results = DB_DataObject::factory('results');
+		$results = DB::factory('results');
 		$results->division_id = $division_id;
 		$results->competitor_red_id = $competitor_id;
 		$results->round_id = 1;		
@@ -81,7 +82,7 @@ function Get_Round_Place($division_id, $competitor_id, $minor_final) {
 				return 2;		
 			}
 		}
-		$results = DB_DataObject::factory('results');
+		$results = DB::factory('results');
 		$results->division_id = $division_id;
 		$results->competitor_blue_id = $competitor_id;
 		$results->round_id = 1;		
@@ -95,7 +96,7 @@ function Get_Round_Place($division_id, $competitor_id, $minor_final) {
 		}	
 		
 		if ($minor_final == "3rd4th" || $minor_final == "3rd3rd") {	
-			$results = DB_DataObject::factory('results');
+			$results = DB::factory('results');
 			$results->division_id = $division_id;
 			$results->competitor_red_id = $competitor_id;
 			$results->round_id = 2;
@@ -103,7 +104,7 @@ function Get_Round_Place($division_id, $competitor_id, $minor_final) {
 			if ($results->find()) {				
 					return 3;				
 			}		
-			$results = DB_DataObject::factory('results');
+			$results = DB::factory('results');
 			$results->division_id = $division_id;
 			$results->competitor_blue_id = $competitor_id;
 			$results->round_id = 2;		
@@ -129,7 +130,7 @@ $champ_count = 0;
 $event_names = array();
 
 
-$competitor = DB_DataObject::factory('competitors');
+$competitor = DB::factory('competitors');
 
 $competitor->tournament_id = $active_tournament->tournament_id;
 $competitor->whereAdd("competitor_count = 0");
@@ -163,9 +164,9 @@ while ($competitor->fetch()) {
 	$champs_list[$champ_count]["AGE"] = GetAgeAtTournament($competitor->DOB, $active_tournament->date_from);
 
 	// for getting get all the events for the active tournament.
- 	$tournament_events_list = DB_DataObject::factory('tournament_events');
+ 	$tournament_events_list = DB::factory('tournament_events');
  	$tournament_events_list->tournament_id =$active_tournament->tournament_id;
-	$events = DB_DataObject::factory('events');
+	$events = DB::factory('events');
 	$tournament_events_list->selectAs();
 	$tournament_events_list->joinAdd($events, "INNER", 'events', 'event_id');
 	$tournament_events_list->selectAs($events, 'events_%s'); 	
@@ -186,7 +187,7 @@ while ($competitor->fetch()) {
   		}
 			  
 	   	// for getting all the divisions in each active event
-	  	$tournament_divisions = DB_DataObject::factory('divisions');	  
+	  	$tournament_divisions = DB::factory('divisions');	  
 	   	$tournament_divisions->tournament_id = $active_tournament->tournament_id;
 	   	$tournament_divisions->event_id = $tournament_events_list->event_id;	
 		$tournament_divisions->find();
@@ -194,7 +195,7 @@ while ($competitor->fetch()) {
 		$found_competitor = 0;
 		while ($tournament_divisions->fetch() && !$found_competitor) {
 
-		   	$competitor_divisions = DB_DataObject::factory('competitor_events');	  
+		   	$competitor_divisions = DB::factory('competitor_events');	  
 		  	$competitor_divisions->division_id = $tournament_divisions->division_id;
 			$competitor_divisions->competitor_id = $competitor->competitor_id;
 			if ($competitor_divisions->find()) {

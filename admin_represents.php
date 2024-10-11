@@ -17,7 +17,9 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 require_once('tournament_settings.php');
-require 'libs/Smarty.class.php';
+require 'vendor/autoload.php';
+use Smarty\Smarty;
+use DB;
 $smarty = new Smarty;
 require 'loginlogout.php';
 if ($user_access != "admin") {
@@ -26,22 +28,21 @@ if ($user_access != "admin") {
 }
 $smarty->assign('current_menu', "Admin");
 
-require_once('DB/DataObject.php');
 require 'configDB.php';
 require 'utility.php';
 
 echo "<br><br><br><br>";
 
 
-$represents = DB_DataObject::factory('represents');
+$represents = DB::factory('represents');
 
-$auth_represents_connection = DB_DataObject::factory('auth_represents_connection');
-$users = DB_DataObject::factory('auth');
+$auth_represents_connection = DB::factory('auth_represents_connection');
+$users = DB::factory('auth');
 $auth_represents_connection->selectAs();
 $auth_represents_connection->joinAdd($users, "INNER", 'auth', 'user_id');
 $auth_represents_connection->selectAs($users, 'users_%s');
 
-$competitors = DB_DataObject::factory('competitors');
+$competitors = DB::factory('competitors');
 $competitors->tournament_id = $active_tournament->tournament_id;
 $competitors->whereAdd("tournament_id = ".$competitors->escape($active_tournament->tournament_id));
 

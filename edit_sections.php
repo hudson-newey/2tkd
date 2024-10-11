@@ -17,7 +17,9 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 require_once('tournament_settings.php');
-require 'libs/Smarty.class.php';
+require 'vendor/autoload.php';
+use Smarty\Smarty;
+use DB;
 $smarty = new Smarty;
 require 'loginlogout.php';
 require 'configDB.php';
@@ -38,7 +40,7 @@ if(isset($_POST["Submit"])) {
 
 
 	if ($_POST["ID"] == "new") {
-		$section = DB_DataObject::factory('sections');
+		$section = DB::factory('sections');
 		$section->name = strip_tags($_POST["Name"]);
 		$section->part = strip_tags($_POST["Part"]);
 		$section->tournament_id = $active_tournament->tournament_id;					
@@ -52,7 +54,7 @@ if(isset($_POST["Submit"])) {
 		}	
 					
 	} else {
-		$section = DB_DataObject::factory('sections');
+		$section = DB::factory('sections');
 		$section->get($_POST["ID"]);
 		$section->tournament_id = $active_tournament->tournament_id;		
 		$section->name = strip_tags($_POST["Name"]);	
@@ -70,7 +72,7 @@ if(isset($_POST["Submit"])) {
 
 } elseif (isset($_POST["Delete"])) {
 	
-	$section = DB_DataObject::factory('sections');
+	$section = DB::factory('sections');
 	$section->get($_POST["ID"]);
 	if (!$section->delete()) {
 		$primary = "section (".$_POST["ID"].") has not been deleted";
@@ -98,7 +100,7 @@ if (isset($_POST["Delete"]) && $delete_success == true) {
 		$smarty->assign("command", $command); 
 
 
-	$section = DB_DataObject::factory('sections');
+	$section = DB::factory('sections');
 	if (isset($_POST["ID"]) && $_POST["ID"] == "new") {
 		$section->section_id = $new_id;
 	} else {

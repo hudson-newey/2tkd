@@ -17,7 +17,9 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 require_once('tournament_settings.php');
-require 'libs/Smarty.class.php';
+require 'vendor/autoload.php';
+use DB;
+use Smarty\Smarty;
 $smarty = new Smarty;
 require 'loginlogout.php';
 require 'configDB.php';
@@ -56,7 +58,7 @@ if (!$active_tournament->draws_public && $user_access != "admin") {
 		$division_selected = $from_division = $_POST["DIVISION_SELECTED"];
 		
 		// give everyone a high order in the selected division
-		$competitor_divisions = DB_DataObject::factory('competitor_events');
+		$competitor_divisions = DB::factory('competitor_events');
 		$competitor_divisions->query("SELECT * FROM {$competitor_divisions->__table} WHERE division_id = ".$from_division." AND event_id = ".$event_selected);
 		$competitor_divisions->query("SET @pos = 1000");
 		$competitor_divisions->query("UPDATE {$competitor_divisions->__table} SET draw_order = ( SELECT @pos := @pos + 1 ) WHERE division_id = ".$from_division." AND event_id = ".$event_selected." ORDER BY draw_order ASC");
@@ -64,7 +66,7 @@ if (!$active_tournament->draws_public && $user_access != "admin") {
 		// order them as selected
 		$order = 0;
 		while ($temp_value = current($_POST['competitor_ids_clicked'])) {
-			$competitor_divisions = DB_DataObject::factory('competitor_events');
+			$competitor_divisions = DB::factory('competitor_events');
 			$competitor_divisions->query("SELECT * FROM {$competitor_divisions->__table} WHERE competitor_id = ".$temp_value." AND event_id = ".$event_selected);
 			$competitor_divisions->query("UPDATE {$competitor_divisions->__table} SET draw_order = ".$order." WHERE competitor_id = ".$temp_value." AND event_id = ".$event_selected." AND division_id = ".$division_selected);
 			$order++;
@@ -72,13 +74,13 @@ if (!$active_tournament->draws_public && $user_access != "admin") {
 		}
 		
 		// then reorder the whole division to include the ones that weren't selected
-		$competitor_divisions = DB_DataObject::factory('competitor_events');
+		$competitor_divisions = DB::factory('competitor_events');
 		$competitor_divisions->query("SELECT * FROM {$competitor_divisions->__table} WHERE division_id = ".$from_division." AND event_id = ".$event_selected);
 		$competitor_divisions->query("SET @pos = -1");
 		$competitor_divisions->query("UPDATE {$competitor_divisions->__table} SET draw_order = ( SELECT @pos := @pos + 1 ) WHERE division_id = ".$from_division." AND event_id = ".$event_selected." ORDER BY draw_order ASC");
 	
 		// the results are no longer going to be valid
-		$results = DB_DataObject::factory('results');
+		$results = DB::factory('results');
 		$results->division_id = $division_selected;
 		$results->find();
 		while ($results->fetch()) {
@@ -94,12 +96,12 @@ if (!$active_tournament->draws_public && $user_access != "admin") {
 
 		while ($temp_value = current($_POST['competitor_ids_clicked'])) {
 	//		echo $temp_value." ".$_POST["DIVISION_SELECTED"]." ".$event_selected."<br>";
-	//DB_DataObject::debugLevel(5);
+	//DB::debugLevel(5);
 			// unless they are going into unassigned need to find the current highest order number
 			if ($_POST["DIVISION_SELECTED"] == 0) {
 				$order = 0;
 			} else {
-				$competitor_divisions = DB_DataObject::factory('competitor_events');
+				$competitor_divisions = DB::factory('competitor_events');
 				$competitor_divisions->event_id = $event_selected;
 				$competitor_divisions->division_id = $_POST["DIVISION_SELECTED"];
 				$competitor_divisions->orderBy("competitor_events.draw_order DESC");
@@ -112,16 +114,16 @@ if (!$active_tournament->draws_public && $user_access != "admin") {
 				
 			}
 	//		echo $order;
-	//DB_DataObject::debugLevel(0);
+	//DB::debugLevel(0);
 			// fins the division the competitor was in
-			$competitor_divisions = DB_DataObject::factory('competitor_events');
+			$competitor_divisions = DB::factory('competitor_events');
 			$competitor_divisions->competitor_id = $temp_value;
 			$competitor_divisions->event_id = $event_selected;
 			$competitor_divisions->find();
 			$competitor_divisions->fetch();	
 			$from_division = $competitor_divisions->division_id;
 					
-			$competitor_divisions = DB_DataObject::factory('competitor_events');
+			$competitor_divisions = DB::factory('competitor_events');
 			$competitor_divisions->query("SELECT * FROM {$competitor_divisions->__table} WHERE competitor_id = ".$temp_value." AND event_id = ".$event_selected);
 	
 			$competitor_divisions->query("UPDATE {$competitor_divisions->__table} SET division_id = ".$_POST["DIVISION_SELECTED"].", draw_order = ".$order." WHERE competitor_id = ".$temp_value." AND event_id = ".$event_selected);
@@ -147,9 +149,9 @@ if (!$active_tournament->draws_public && $user_access != "admin") {
 	$tournament_total_signed_in = 0;
 
 	// for getting get all the events for the active tournament.
- 	$tournament_events_list = DB_DataObject::factory('tournament_events');
+ 	$tournament_events_list = DB::factory('tournament_events');
  	$tournament_events_list->tournament_id = $active_tournament->tournament_id;
-	$events = DB_DataObject::factory('events');
+	$events = DB::factory('events');
 	$tournament_events_list->selectAs();
 	$tournament_events_list->joinAdd($events, "INNER", 'events', 'event_id');
 	$tournament_events_list->selectAs($events, 'events_%s'); 	
@@ -158,7 +160,7 @@ if (!$active_tournament->draws_public && $user_access != "admin") {
  	while ($tournament_events_list->fetch()) {
 		  
 	   	// for getting all the divisions in each active event
-	  	$tournament_divisions = DB_DataObject::factory('divisions');	  
+	  	$tournament_divisions = DB::factory('divisions');	  
 	   	$tournament_divisions->tournament_id = $active_tournament->tournament_id;
 		$tournament_divisions->event_id = $tournament_events_list->event_id;
 		$tournament_divisions->orderBy("sequence ASC");
@@ -177,9 +179,9 @@ if (!$active_tournament->draws_public && $user_access != "admin") {
 			$signed_in_count = 0;	
 //			echo $tournament_events_list->event_id."<br>";
 			 // for getting all the competitors in each active division 		  
-		   	$competitor_divisions = DB_DataObject::factory('competitor_events');	  
+		   	$competitor_divisions = DB::factory('competitor_events');	  
 		  	$competitor_divisions->event_id = $tournament_events_list->event_id;
-		  	$competitors = DB_DataObject::factory('competitors');
+		  	$competitors = DB::factory('competitors');
 		  	$competitor_divisions->selectAs();	  
 		 	$competitor_divisions->joinAdd($competitors, "INNER", 'competitors', 'competitor_id');
 			$competitor_divisions->selectAs($competitors, 'competitors_%s'); 
@@ -254,9 +256,9 @@ if (!$active_tournament->draws_public && $user_access != "admin") {
 		// and no entry in competitor_divisions for the current event_id
 
 		// first find all the competitors that need to be in a division in this event
-		$competitors = DB_DataObject::factory('competitors');
+		$competitors = DB::factory('competitors');
 		$competitors->tournament_id = $active_tournament->tournament_id;
-		$competitors_events = DB_DataObject::factory('competitor_events');
+		$competitors_events = DB::factory('competitor_events');
 		$competitors->joinAdd($competitors_events, "INNER", 'competitor_events', 'competitor_id');
 		$competitors->selectAs($competitors_events, 'competitors_events_%s');
 		$competitors->whereAdd("competitor_events.event_id = '".$tournament_events_list->event_id."'");	
@@ -359,9 +361,9 @@ if (!$active_tournament->draws_public && $user_access != "admin") {
 // they get a list of divisions for their ring
 } else if ($user_access == "steward" && !isset($_GET["TYPE"])) {
 
-	$divisions = DB_DataObject::factory('divisions');
+	$divisions = DB::factory('divisions');
 	$divisions->tournament_id = $active_tournament->tournament_id;
-	$events = DB_DataObject::factory('events');
+	$events = DB::factory('events');
 	
 	$divisions->selectAs();
 	$divisions->joinAdd($events, "INNER", 'events', 'event_id');
@@ -390,9 +392,9 @@ if (!$active_tournament->draws_public && $user_access != "admin") {
 	$team_division = 0;
 	
 	// for getting get all the events for the active tournament.
- 	$tournament_events_list = DB_DataObject::factory('tournament_events');
+ 	$tournament_events_list = DB::factory('tournament_events');
  	$tournament_events_list->tournament_id = $active_tournament->tournament_id;
-	$events = DB_DataObject::factory('events');
+	$events = DB::factory('events');
 	$tournament_events_list->selectAs();
 	$tournament_events_list->joinAdd($events, "INNER", 'events', 'event_id');
 	$tournament_events_list->selectAs($events, 'events_%s'); 	
@@ -401,7 +403,7 @@ if (!$active_tournament->draws_public && $user_access != "admin") {
  	while ($tournament_events_list->fetch()) {
 		  
 	   	// for getting all the divisions in each active event
-	  	$tournament_divisions = DB_DataObject::factory('divisions');	  
+	  	$tournament_divisions = DB::factory('divisions');	  
 	   	$tournament_divisions->tournament_id = $active_tournament->tournament_id;
 	   	$tournament_divisions->event_id = $tournament_events_list->event_id;		
 	   	if (isset($_GET["SECTION"]) && $_GET["SECTION"] != 0) {
@@ -417,9 +419,9 @@ if (!$active_tournament->draws_public && $user_access != "admin") {
 			
 			$competitor_count = 0;	
 	  
-		   	$competitor_divisions = DB_DataObject::factory('competitor_events');	  
+		   	$competitor_divisions = DB::factory('competitor_events');	  
 		  	$competitor_divisions->event_id = $tournament_events_list->event_id;
-		  	$competitors = DB_DataObject::factory('competitors');
+		  	$competitors = DB::factory('competitors');
 		  	$competitor_divisions->selectAs();	  
 		 	$competitor_divisions->joinAdd($competitors, "INNER", 'competitors', 'competitor_id');
 			$competitor_divisions->selectAs($competitors, 'competitors_%s'); 

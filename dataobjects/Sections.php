@@ -2,9 +2,10 @@
 /**
  * Table Definition for sections
  */
-require_once 'DB/DataObject.php';
+require_once 'vendor/autoload.php';
+use DB;
 
-class DataObjects_Sections extends DB_DataObject 
+class DataObjects_Sections extends DB 
 {
     ###START_AUTOCODE
     /* the code below is auto generated do not remove the above tag */
@@ -17,7 +18,7 @@ class DataObjects_Sections extends DB_DataObject
     public $part;                            // int(11)  not_null
 
     /* Static get */
-    function staticGet($k,$v=NULL) { return DB_DataObject::staticGet('DataObjects_Sections',$k,$v); }
+    function staticGet($k,$v=NULL) { return DB::staticGet('DataObjects_Sections',$k,$v); }
 
     /* the code above is auto generated do not remove the tag below */
     ###END_AUTOCODE

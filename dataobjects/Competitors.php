@@ -2,9 +2,10 @@
 /**
  * Table Definition for competitors
  */
-require_once 'DB/DataObject.php';
+require_once 'vendor/autoload.php';
+use DB;
 
-class DataObjects_Competitors extends DB_DataObject 
+class DataObjects_Competitors extends DB 
 {
     ###START_AUTOCODE
     /* the code below is auto generated do not remove the above tag */
@@ -40,7 +41,7 @@ class DataObjects_Competitors extends DB_DataObject
     public $received_form;                   // int(1)  not_null
 
     /* Static get */
-    function staticGet($k,$v=NULL) { return DB_DataObject::staticGet('DataObjects_Competitors',$k,$v); }
+    function staticGet($k,$v=NULL) { return DB::staticGet('DataObjects_Competitors',$k,$v); }
 
     /* the code above is auto generated do not remove the tag below */
     ###END_AUTOCODE

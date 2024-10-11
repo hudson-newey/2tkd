@@ -17,6 +17,9 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 require_once('tournament_settings.php');
+require 'vendor/autoload.php';
+use DB;
+
 require 'configDB.php';
 
 //echo "<br><br><br><br><br><br><br><br>";
@@ -28,14 +31,14 @@ $smarty->assign('date', "%d %b, %Y");
 $smarty->assign('date_time', "%I:%M%p %d %b, %Y");
 
 // gets the active tournament details ... most pages need some of this information
-$active_tournament = DB_DataObject::factory('tournaments');
+$active_tournament = DB::factory('tournaments');
 $active_tournament->whereAdd('active = 1');
 $active_tournament->find();
 $active_tournament->fetch();
 
 // rank to rank display look up
 $rank_display_lookup = Array();
-$rank = DB_DataObject::factory('rank');
+$rank = DB::factory('rank');
 $rank->find();
 while ($rank->fetch()) {
 	$rank_display_lookup[$rank->rank_id] = $rank->html_display;
@@ -45,7 +48,7 @@ while ($rank->fetch()) {
 	$rank_display_lookup_name[0] = " ";	
 
 $represents_display_lookup = Array();
-$represents = DB_DataObject::factory('represents');
+$represents = DB::factory('represents');
 $represents->find();
 while ($represents->fetch()) {
 	$represents_display_lookup[$represents->represents_id] = $represents->name;	
@@ -69,9 +72,9 @@ while ($represents->fetch()) {
 	       ));
 
 
-		$active_tournament_events = DB_DataObject::factory('tournament_events');
+		$active_tournament_events = DB::factory('tournament_events');
 		$active_tournament_events->tournament_id = $active_tournament->tournament_id;
-		$events_temp = DB_DataObject::factory('events');
+		$events_temp = DB::factory('events');
 		$active_tournament_events->selectAs();
 		$active_tournament_events->joinAdd($events_temp, "INNER", 'events', 'event_id');
 		$active_tournament_events->selectAs($events_temp, 'events_%s');
@@ -124,7 +127,7 @@ function Convert_Enrolment_String_To_Char($enrolment_string, &$active_count) {
 
 function eventidtostring($event_id)
 {
-	$events = DB_DataObject::factory('events');
+	$events = DB::factory('events');
 	$events->event_id = $event_id;
 	if ($events->find()) {	
 		$events->fetch();
@@ -491,9 +494,9 @@ $repercharge_css_style = array(
 
 function Get_Competitor_IDs_Division($division_id) {
 	global $active_tournament;
-	$competitor_divisions = DB_DataObject::factory('competitor_events');	  
+	$competitor_divisions = DB::factory('competitor_events');	  
 	$competitor_divisions->division_id = $division_id;		  	
-	$competitors = DB_DataObject::factory('competitors');
+	$competitors = DB::factory('competitors');
 	$competitor_divisions->selectAs();	  
 	$competitor_divisions->joinAdd($competitors, "INNER", 'competitors', 'competitor_id');
 	$competitor_divisions->selectAs($competitors, 'competitors_%s'); 
@@ -513,7 +516,7 @@ function Get_Competitor_IDs_Division($division_id) {
 
 function Clear_Division($division_id) {
 		
-	$results = DB_DataObject::factory('results');
+	$results = DB::factory('results');
 	$results->division_id = $division_id;
 	$results->find();
 	while ($results->fetch()) {
@@ -523,7 +526,7 @@ function Clear_Division($division_id) {
 
 function Sort_Division($division_id) {
 
-	$competitor_divisions = DB_DataObject::factory('competitor_events');
+	$competitor_divisions = DB::factory('competitor_events');
 	$competitor_divisions->query("SELECT * FROM {$competitor_divisions->__table} WHERE division_id = ".$division_id);//." AND event_id = ".$event_selected);
 	$competitor_divisions->query("SET @pos = -1");
 	$competitor_divisions->query("UPDATE {$competitor_divisions->__table} SET draw_order = ( SELECT @pos := @pos + 1 ) WHERE division_id = ".$division_id./*" AND event_id = ".$event_selected.*/" ORDER BY draw_order ASC");
@@ -532,7 +535,7 @@ function Sort_Division($division_id) {
 
 function Unassign_Division($division_id, $event_id) {
 
-	$competitor_divisions = DB_DataObject::factory('competitor_events');
+	$competitor_divisions = DB::factory('competitor_events');
 	$competitor_divisions->query("SELECT * FROM {$competitor_divisions->__table} WHERE event_id = ".$event_id." AND division_id = ".$division_id);
 	$competitor_divisions->query("UPDATE {$competitor_divisions->__table} SET draw_order = 0, division_id = 0 WHERE event_id = ".$event_id." AND division_id = ".$division_id);
 	
@@ -541,7 +544,7 @@ function Unassign_Division($division_id, $event_id) {
 function Get_Tournament_List() {
 	
 	$temp_array = array();
-	$tournament = DB_DataObject::factory('tournaments');
+	$tournament = DB::factory('tournaments');
 	$tournament->find();
 	 while ($tournament->fetch()) {
 			$temp_array[$tournament->tournament_id] = $tournament->name.", ".$tournament->date_from;
@@ -555,15 +558,15 @@ function Get_Tournament_List() {
 function Remove_Competitor_And_Init_Division($competitor_id, $event_id) {
 	
 	// work out what division the competitor is in 
-	$competitor_divisions = DB_DataObject::factory('competitor_events');
+	$competitor_divisions = DB::factory('competitor_events');
 	$competitor_divisions->event_id = $event_id;
 	$competitor_divisions->competitor_id = $competitor_id;
 	if ($competitor_divisions->find()) {
 		$competitor_divisions->fetch();
 		$division_id = $competitor_divisions->division_id;	
 
-//		DB_DataObject::debugLevel(5);
-		$competitor_events = DB_DataObject::factory('competitor_events');
+//		DB::debugLevel(5);
+		$competitor_events = DB::factory('competitor_events');
 		$competitor_events->query("DELETE FROM {$competitor_events->__table} WHERE event_id = ".$event_id." AND competitor_id = ".$competitor_id);
 
 	
@@ -587,7 +590,7 @@ function Update_Results_From_Forms($division_id, $division_type, $competitors_in
 	$stored_result = array();
 	
 	for ($i = 1; $i < $competitors_in_draw + 1; $i++) {
-		$stored_result[$i] = DB_DataObject::factory('results');
+		$stored_result[$i] = DB::factory('results');
 		$stored_result[$i]->division_id = $division_id;		
 		$stored_result[$i]->round_id = $i;
 		$stored_result[$i]->find();
@@ -595,9 +598,9 @@ function Update_Results_From_Forms($division_id, $division_type, $competitors_in
 	}
 	
 	Clear_Division($division_id);
-//		DB_DataObject::debugLevel(5);	
+//		DB::debugLevel(5);	
 	for ($i = 1; $i < $competitors_in_draw + 1; $i++) {	
-		$result = DB_DataObject::factory('results');
+		$result = DB::factory('results');
 		$result->division_id = $division_id;		
 		$result->round_id = $i;
 		$result->technique1 = $technique1[$i];		
@@ -628,7 +631,7 @@ function Update_Results_From_Forms($division_id, $division_type, $competitors_in
 										
 		$result->insert();
 	}		
-	//DB_DataObject::debugLevel(0);
+	//DB::debugLevel(0);
 } 
 
 
@@ -639,7 +642,7 @@ function Update_Results_From_Rounds($division_id, $division_type, $competitors_i
 
 
 	for ($i = 1; $i < $round_count_lookup[$competitors_in_draw] + 1; $i++) {
-		$results = DB_DataObject::factory('results');
+		$results = DB::factory('results');
 		$results->division_id = $division_id;		
 		$results->round_id = $i;
 		$results->competitor_red_id = $round_red[$i];
@@ -669,7 +672,7 @@ function Update_Results_From_Rounds($division_id, $division_type, $competitors_i
 	if ($division_type == "Repercharge") {
 		
 		for ($i = 101; $i < $loser_round_count_lookup[$competitors_in_draw] + 101; $i++) {
-			$results = DB_DataObject::factory('results');
+			$results = DB::factory('results');
 			$results->division_id = $division_id;		
 			$results->round_id = $i;
 			$results->competitor_red_id = $round_red[$i];
@@ -700,7 +703,7 @@ function Update_Results_From_Rounds($division_id, $division_type, $competitors_i
 
 function Clear_Results_And_Init_Division($division_id) {
 	
-	$division = DB_DataObject::factory('divisions');
+	$division = DB::factory('divisions');
 	$division->division_id = $division_id;
 	$division->find();
 	$division->fetch();
@@ -749,7 +752,7 @@ function Clear_Results_And_Init_Division($division_id) {
 				if ($odd  == 1 && $j == 0)
 					continue;
 //				echo "<br>i".$i."j".$j;
-				$results = DB_DataObject::factory('results');
+				$results = DB::factory('results');
 				$results->division_id = $division_id;		
 				$results->round_id = $round_id;
 				if ($j == 0) {
@@ -801,7 +804,7 @@ function Clear_Results_And_Init_Division($division_id) {
 //		echo $competitors_in_draw;	
 		for ($i = 1; $i < $competitors_in_draw + 1; $i++) {
 				
-			$results = DB_DataObject::factory('results');
+			$results = DB::factory('results');
 			$results->division_id = $division_id;		
 			$results->round_id = $i;
 			$results->competitor_red_id = $competitor_list_id[$i - 1];
@@ -866,7 +869,7 @@ function Clear_Results_And_Init_Division($division_id) {
 			}
 			
 			// get when the division was last updated, by who, and what the result was
-			$results = DB_DataObject::factory('results');
+			$results = DB::factory('results');
 			$results->division_id = $division_id;		
 			$results->round_id = $i;
 			$results->find();				
@@ -898,7 +901,7 @@ function Clear_Results_And_Init_Division($division_id) {
 				}
 				
 				// get when the division was last updated, by who, and what the result was
-				$results = DB_DataObject::factory('results');
+				$results = DB::factory('results');
 				$results->division_id = $division_id;		
 				$results->round_id = $i;
 				$results->find();				
@@ -953,7 +956,7 @@ function Get_Competitor_Name($id) {
 		return " ";
 	}
 	
-	$competitors = DB_DataObject::factory('competitors');
+	$competitors = DB::factory('competitors');
 	$competitors->competitor_id = $id;
 	$competitors->find();
 	$competitors->fetch();
@@ -962,7 +965,7 @@ function Get_Competitor_Name($id) {
 
 function Get_Real_Competitor_Name($id) {
 	
-	$competitors = DB_DataObject::factory('competitors');
+	$competitors = DB::factory('competitors');
 	$competitors->competitor_id = $id;
 	$competitors->find();
 	$competitors->fetch();
@@ -998,7 +1001,7 @@ function Get_Payment_Amount($payment_id, $competitor_id, $competitor_DOB, $tourn
 
 function Get_Section_Name($id) {
 	
-	$sections = DB_DataObject::factory('sections');		
+	$sections = DB::factory('sections');		
 	$sections->section_id = $id;
 	if ($sections->find()) {
 		$sections->fetch();
@@ -1011,7 +1014,7 @@ function Get_Section_Name($id) {
 
 function Get_Event_Name($id) {
 	
-	$events = DB_DataObject::factory('events');		
+	$events = DB::factory('events');		
 	$events->event_id = $id;
 	if ($events->find()) {
 		$events->fetch();

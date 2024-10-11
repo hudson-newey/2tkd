@@ -19,12 +19,13 @@
 require_once('tournament_settings.php');
 
 require 'vendor/autoload.php';
+use Smarty\Smarty;
+use DB;
 
 $smarty = new Smarty;
 
 require 'loginlogout.php';
 
-require_once('DB/DataObject.php');
 require 'configDB.php';
 require 'utility.php';
 
@@ -33,7 +34,7 @@ $smarty->assign('current_menu', "Main");
 
 if(isset($_POST["Submit"])) {
 	// make them all inactive first
-	$tournament = DB_DataObject::factory('tournaments');
+	$tournament = DB::factory('tournaments');
 	$tournament->find();
 	while ($tournament->fetch()) {
 		$tournament->active = 0;
@@ -42,7 +43,7 @@ if(isset($_POST["Submit"])) {
 
 	//activate the selected one
 	
-	$tournament = DB_DataObject::factory('tournaments');
+	$tournament = DB::factory('tournaments');
 	$tournament->tournament_id = $_POST["Active"];
 	$tournament->find();
 	$tournament->fetch();
@@ -53,12 +54,12 @@ if(isset($_POST["Submit"])) {
 }
 
 if ($user_access == "admin") {
-	$tournament = DB_DataObject::factory('tournaments');
+	$tournament = DB::factory('tournaments');
 	
 	$tournament->find();
 	 while ($tournament->fetch()) {
 
-		$competitor = DB_DataObject::factory('competitors');
+		$competitor = DB::factory('competitors');
 		$competitor->tournament_id = $tournament->tournament_id;
 		$competitor->competitor_count = 0;
 		$competitor_count = $competitor->find();
@@ -78,13 +79,13 @@ if ($user_access == "admin") {
 	}
 } else {
 
-	$competitor = DB_DataObject::factory('competitors');
+	$competitor = DB::factory('competitors');
 	$competitor->tournament_id = $active_tournament->tournament_id;
 	$competitor->competitor_count = 0;	
 	$competitor_count = $competitor->find();
 	$smarty->assign('competitor_count', $competitor_count);
 	
-	$competitor = DB_DataObject::factory('competitors');
+	$competitor = DB::factory('competitors');
 	$competitor->tournament_id = $active_tournament->tournament_id;
 	$competitor->whereAdd("competitors.competitor_count > 0");	
 	$competitor_count = $competitor->find();

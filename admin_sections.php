@@ -17,7 +17,9 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 require_once('tournament_settings.php');
-require 'libs/Smarty.class.php';
+require 'vendor/autoload.php';
+use Smarty\Smarty;
+use DB;
 $smarty = new Smarty;
 require 'loginlogout.php';
 if ($user_access != "admin") {
@@ -26,7 +28,6 @@ if ($user_access != "admin") {
 }
 $smarty->assign('current_menu', "Admin");
 
-require_once('DB/DataObject.php');
 require 'configDB.php';
 require 'utility.php';
 
@@ -35,11 +36,11 @@ echo "<br><br><br><br>";
 
 if(isset($_POST["Copy_Sections"])) {
 	
-	$sections = DB_DataObject::factory('sections');
+	$sections = DB::factory('sections');
 	$sections->tournament_id = current($_POST["Tournaments"]);
 	$sections->find();
 	while ($sections->fetch()) {
-		$section = DB_DataObject::factory('sections');
+		$section = DB::factory('sections');
 		$section->name = $sections->name;
 		$section->tournament_id = $active_tournament->tournament_id;
 		$section->date = "0000-00-00";
@@ -51,7 +52,7 @@ if(isset($_POST["Copy_Sections"])) {
 
 $smarty->assign('tournaments_list', Get_Tournament_List());  
    
-$sections = DB_DataObject::factory('sections');
+$sections = DB::factory('sections');
 $sections->tournament_id = $active_tournament->tournament_id;
 $sections->find();
 

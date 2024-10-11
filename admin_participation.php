@@ -17,14 +17,16 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 require_once('tournament_settings.php');
-require 'libs/Smarty.class.php';
+require 'vendor/autoload.php';
+use Smarty\Smarty;
+use DB;
 $smarty = new Smarty;
 require 'loginlogout.php';
 require 'configDB.php';
 require 'utility.php';
 
 
-$competitors = DB_DataObject::factory('competitors');
+$competitors = DB::factory('competitors');
 $competitors->whereAdd("tournament_id = ".$competitors->escape($active_tournament->tournament_id));
 
 $competitors->orderBy("last_name ASC");

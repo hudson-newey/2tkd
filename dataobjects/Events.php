@@ -2,9 +2,10 @@
 /**
  * Table Definition for events
  */
-require_once 'DB/DataObject.php';
+require_once 'vendor/autoload.php';
+use DB;
 
-class DataObjects_Events extends DB_DataObject 
+class DataObjects_Events extends DB 
 {
     ###START_AUTOCODE
     /* the code below is auto generated do not remove the above tag */
@@ -16,7 +17,7 @@ class DataObjects_Events extends DB_DataObject
     public $max_competitors;                 // int(6)  not_null
 
     /* Static get */
-    function staticGet($k,$v=NULL) { return DB_DataObject::staticGet('DataObjects_Events',$k,$v); }
+    function staticGet($k,$v=NULL) { return DB::staticGet('DataObjects_Events',$k,$v); }
 
     /* the code above is auto generated do not remove the tag below */
     ###END_AUTOCODE

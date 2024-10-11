@@ -17,7 +17,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 require_once('tournament_settings.php');
-require_once 'DB/DataObject.php';
+use PEAR;
 $config = parse_ini_file('pear.ini',TRUE);
 
 foreach($config as $class=>$values) {

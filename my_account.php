@@ -18,18 +18,18 @@
 */
 
 require_once('tournament_settings.php');
-require 'libs/Smarty.class.php';
-$smarty = new Smarty;
+require 'vendor/autoload.php';
+use DB;
+
 require 'loginlogout.php';
 
-require_once('DB/DataObject.php');
 require 'configDB.php';
 require 'utility.php';
 
 if ($user_access == "admin" || $user_access == "manager" || $user_access == "steward") {
 
 	if (isset($_POST["Submit_Update"])) {
-	 //DB_DataObject::debugLevel(5);
+	 //DB::debugLevel(5);
 	
 		// checks first
 		$user_input_passed = true;
@@ -40,7 +40,7 @@ if ($user_access == "admin" || $user_access == "manager" || $user_access == "ste
 			$primary = "Your details have not been updated because: ";
 			$smarty->assign(array('primary' => $primary, 'level' => "error")); 
 		} else {
-			$user = DB_DataObject::factory('auth');
+			$user = DB::factory('auth');
 			$user->get($_POST["ID"]);
 			$user->first_name = strip_tags($_POST["First_Name"]);
 			$user->last_name = strip_tags($_POST["Last_Name"]);
@@ -71,7 +71,7 @@ if ($user_access == "admin" || $user_access == "manager" || $user_access == "ste
 		}
 	} 
 
-	$user = DB_DataObject::factory('auth');
+	$user = DB::factory('auth');
 	$user->whereAdd("username = '".$user->escape($username)."'");
 
 	$user->find();
@@ -93,7 +93,7 @@ if ($user_access == "admin" || $user_access == "manager" || $user_access == "ste
 
 	if (isset($_POST["Submit_Reset"])) {
 		
-		$user = DB_DataObject::factory('auth');
+		$user = DB::factory('auth');
 		$user->whereAdd("username = '".$_POST["USERNAME"]."'");
 		$user->whereAdd("email = '".$_POST["Email"]."'");			
 		if(!$user->find()) {

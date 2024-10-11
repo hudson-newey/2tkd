@@ -18,7 +18,9 @@
 */
 
 require_once('tournament_settings.php');
-require 'libs/Smarty.class.php';
+require 'vendor/autoload.php';
+use Smarty\Smarty;
+use DB;
 $smarty = new Smarty;
 $smarty->caching = 1;
 $smarty->compile_check = true;
@@ -32,13 +34,13 @@ $smarty->assign('current_menu', "Registration");
 // processes all competitors for this tournament.
 if(isset($_POST["Submit"])) {
 
-	$competitors = DB_DataObject::factory('competitors');
+	$competitors = DB::factory('competitors');
 	$competitors->whereAdd("tournament_id = ".$competitors->escape($active_tournament->tournament_id));
 	$competitors->whereAdd("competitors.competitor_count = 0");		
 	$competitors->find();	
 	while($competitors->fetch()) {
 		
-		$competitor = DB_DataObject::factory('competitors');
+		$competitor = DB::factory('competitors');
 		$competitor->get($competitors->competitor_id);
 		$competitor->enrolment = $_POST["enrolment".(string) $competitors->competitor_id];
 		$competitor->received_form = isset($_POST["paperwork".(string) $competitors->competitor_id]);
@@ -51,17 +53,17 @@ if(isset($_POST["Submit"])) {
 
 
 
-$competitors = DB_DataObject::factory('competitors');
+$competitors = DB::factory('competitors');
 $competitors->whereAdd("tournament_id = ".$competitors->escape($active_tournament->tournament_id));
 
 
-$represents = DB_DataObject::factory('represents');
+$represents = DB::factory('represents');
 $competitors->selectAs();
 $competitors->joinAdd($represents, "INNER", 'represents', 'represents_id');
 $competitors->selectAs($represents, 'represent_%s');
 
 if ($user_access == "manager") {
-	$auth_represents_connection = DB_DataObject::factory('auth_represents_connection');
+	$auth_represents_connection = DB::factory('auth_represents_connection');
  	$auth_represents_connection->whereAdd("tournament_id = ".$active_tournament->tournament_id); 	// zzz	
 }
 
@@ -93,11 +95,11 @@ if (!$smarty->is_cached('registration.tpl') || $user_access == "manager" || $use
  *  This is for optimisation and makes an array of [competitor_id][event_id] = [1,0]
  */
 $i = 0;
-$competitor_events = DB_DataObject::factory('competitor_events'); 		
+$competitor_events = DB::factory('competitor_events'); 		
 
 while (isset($active_tournament_events_id[$i])) {
 	if ($temp_selection_team_event[$i]) {		
-		$team_competitor = DB_DataObject::factory('competitors');
+		$team_competitor = DB::factory('competitors');
 		$team_competitor->tournament_id = $active_tournament->tournament_id;
 		$team_competitor->whereAdd("competitor_count > 0");
 		$team_competitor->find();	
@@ -131,7 +133,7 @@ while (isset($active_tournament_events_id[$i])) {
 
 
 $competitors->find();
-//DB_DataObject::debugLevel(0);
+//DB::debugLevel(0);
 
 while ($competitors->fetch()) {
 
@@ -165,7 +167,7 @@ while ($competitors->fetch()) {
 		$temp_selection_array = array();
 		while (isset($active_tournament_events_id[$i])) {
 		//	if ($temp_selection_team_event[$i]) {
-				$competitor_events = DB_DataObject::factory('competitor_events');
+				$competitor_events = DB::factory('competitor_events');
 				$competitor_events->competitor_id = $competitors->competitor_id;
 				$competitor_events->event_id = $active_tournament_events_id[$i];
 				if ($competitor_events->find()) {
@@ -203,8 +205,8 @@ while ($competitors->fetch()) {
 		// get all the teams
 		
 
-		$competitor_events = DB_DataObject::factory('competitor_events');
-		$team_competitors = DB_DataObject::factory('competitors');				
+		$competitor_events = DB::factory('competitor_events');
+		$team_competitors = DB::factory('competitors');				
 		while (isset($active_tournament_events_id[$i])) {
 			if ($temp_selection_team_event[$i]) {
 				

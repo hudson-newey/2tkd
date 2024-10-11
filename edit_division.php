@@ -17,7 +17,9 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 require_once('tournament_settings.php');
-require 'libs/Smarty.class.php';
+require 'vendor/autoload.php';
+use Smarty\Smarty;
+use DB;
 $smarty = new Smarty;
 require 'loginlogout.php';
 require 'configDB.php';
@@ -38,7 +40,7 @@ if(isset($_POST["Submit"])) {
 
 
 	if ($_POST["ID"] == "new") {
-		$division = DB_DataObject::factory('divisions');
+		$division = DB::factory('divisions');
 		$division->sequence = strip_tags($_POST["Sequence"]);		
 		$division->name = strip_tags($_POST["Name"]);
 		$division->tournament_id = $active_tournament->tournament_id;
@@ -69,14 +71,14 @@ if(isset($_POST["Submit"])) {
 			
 	} else {
 		// store elements that we want to test to see if they change because they affect the draw
-		$division = DB_DataObject::factory('divisions');
+		$division = DB::factory('divisions');
 		$division->division_id = $_POST["ID"];
 		$division->find();
 		$division->fetch();
 		$type = $division->type;
 		$minor_final = $division->minor_final;
 	
-		$division = DB_DataObject::factory('divisions');
+		$division = DB::factory('divisions');
 		$division->get($_POST["ID"]);
 		$division->tournament_id = $active_tournament->tournament_id;
 		$division->sequence= strip_tags($_POST["Sequence"]);				
@@ -111,7 +113,7 @@ if(isset($_POST["Submit"])) {
 
 } elseif (isset($_POST["Delete"])) {
 	
-	$division = DB_DataObject::factory('divisions');
+	$division = DB::factory('divisions');
 	$division->get($_POST["ID"]);
 	if (!$division->delete()) {
 		$primary = "Division (".$_POST["ID"].") has not been deleted";
@@ -144,7 +146,7 @@ if (isset($_POST["Delete"]) && $delete_success == true) {
 		$smarty->assign("command", $command); 
 
 
-	$division = DB_DataObject::factory('divisions');
+	$division = DB::factory('divisions');
 	if (isset($_POST["ID"]) && $_POST["ID"] == "new") {
 		$division->division_id = $new_id;
 	} else {
@@ -174,7 +176,7 @@ if (isset($_POST["Delete"]) && $delete_success == true) {
     
 }
      $temp_array = array();
- 	$events_list = DB_DataObject::factory('events');
+ 	$events_list = DB::factory('events');
  	$events_list->orderBy('name');
  	$events_list->find();
  	while ($events_list->fetch())
@@ -182,7 +184,7 @@ if (isset($_POST["Delete"]) && $delete_success == true) {
    $smarty->assign('events_list', $temp_array);  
 
      $temp_array2 = array();
- 	$sections_list = DB_DataObject::factory('sections');
+ 	$sections_list = DB::factory('sections');
  	$sections_list->tournament_id = $active_tournament->tournament_id;
  	$sections_list->orderBy('name');
  	$sections_list->find();

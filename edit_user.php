@@ -17,7 +17,9 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 require_once('tournament_settings.php');
-require 'libs/Smarty.class.php';
+require 'vendor/autoload.php';
+use Smarty\Smarty;
+use DB;
 $smarty = new Smarty;
 require 'loginlogout.php';
 require 'configDB.php';
@@ -34,7 +36,7 @@ $delete_success = false;
 $user_input_passed = true;
 	
 if(isset($_POST["Submit"])) {
- //DB_DataObject::debugLevel(5);
+ //DB::debugLevel(5);
 
 	// checks first
 
@@ -44,7 +46,7 @@ if(isset($_POST["Submit"])) {
 		$primary = "User has not been added because: ";
 		$smarty->assign(array('primary' => $primary, 'level' => "error")); 
 	} else if ($_POST["ID"] == "new") {
-		$user = DB_DataObject::factory('auth');
+		$user = DB::factory('auth');
 		$user->username = strip_tags($_POST["USERNAME"]);
 		$user->title = strip_tags($_POST["Title"]);
 		$user->first_name = strip_tags($_POST["First_Name"]);
@@ -73,7 +75,7 @@ if(isset($_POST["Submit"])) {
 			$smarty->assign(array('primary' => $primary, 'level' => "success"));
 		}
 
-		$auth_represents_connection = DB_DataObject::factory('auth_represents_connection');
+		$auth_represents_connection = DB::factory('auth_represents_connection');
  		$auth_represents_connection->tournament_id = $active_tournament->tournament_id; // zzz
 		$auth_represents_connection->user_id = $new_id;
 		if (isset($_POST["Represents"])) {
@@ -85,14 +87,14 @@ if(isset($_POST["Submit"])) {
 		}
 				
 	} else {
-		$auth_represents_connection = DB_DataObject::factory('auth_represents_connection');
+		$auth_represents_connection = DB::factory('auth_represents_connection');
  		$auth_represents_connection->tournament_id = $active_tournament->tournament_id; 	// zzz		
 		$auth_represents_connection->user_id = $_POST["ID"];
 		$auth_represents_connection->find();
 		while ($auth_represents_connection->fetch()) {
 			$auth_represents_connection->delete();	
 		}
-		$auth_represents_connection = DB_DataObject::factory('auth_represents_connection');
+		$auth_represents_connection = DB::factory('auth_represents_connection');
  		$auth_represents_connection->tournament_id = $active_tournament->tournament_id; // zzz
 		$auth_represents_connection->user_id = $_POST["ID"];
 		if (isset($_POST["Represents"])) {
@@ -103,7 +105,7 @@ if(isset($_POST["Submit"])) {
 			}
 		}
 		
-		$user = DB_DataObject::factory('auth');
+		$user = DB::factory('auth');
 		$user->get($_POST["ID"]);
 		$user->username = strip_tags($_POST["USERNAME"]);
 		$user->title = strip_tags($_POST["Title"]);		
@@ -123,7 +125,7 @@ if(isset($_POST["Submit"])) {
 	}
 
 } elseif (isset($_POST["Delete"])) {
-	$user = DB_DataObject::factory('auth');
+	$user = DB::factory('auth');
 	$user->get($_POST["ID"]);
 	if (!$user->delete()) {
 		$primary = "User (".$_POST["USERNAME"].") has not been deleted";
@@ -151,7 +153,7 @@ if (isset($_POST["Delete"]) && $delete_success == true) {
 	$command = "Edit details and submit or delete <a href=\"edit_user.php?ID=new\">add new user</a>.";
 	$smarty->assign("command", $command); 
 
-	$user = DB_DataObject::factory('auth');
+	$user = DB::factory('auth');
 	if (isset($_POST["ID"]) && $_POST["ID"] == "new") {
 		$user->user_id = $new_id;
 	} else {
@@ -174,7 +176,7 @@ if (isset($_POST["Delete"]) && $delete_success == true) {
        ));
   
 
-		$auth_represents_connection = DB_DataObject::factory('auth_represents_connection');
+		$auth_represents_connection = DB::factory('auth_represents_connection');
  		$auth_represents_connection->tournament_id = $active_tournament->tournament_id; 	// zzz				
 		$auth_represents_connection->user_id = $user->user_id;
 		$auth_represents_connection->find();
@@ -188,7 +190,7 @@ if (isset($_POST["Delete"]) && $delete_success == true) {
 }
 
   	$temp_array = array();
- 	$represents_list = DB_DataObject::factory('represents');
+ 	$represents_list = DB::factory('represents');
  	$represents_list->orderBy('name');
  	$represents_list->find();
  	while ($represents_list->fetch())
