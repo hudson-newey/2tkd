@@ -16,9 +16,9 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
-require_once('../../tournament_settings.php');
+require_once('tournament_settings.php');
 require_once 'DB/DataObject.php';
-$config = parse_ini_file('../../pear.ini',TRUE);
+$config = parse_ini_file('pear.ini',TRUE);
 
 foreach($config as $class=>$values) {
     $options = &PEAR::getStaticProperty($class,'options');

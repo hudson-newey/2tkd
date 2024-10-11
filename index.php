@@ -16,9 +16,9 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
-require_once('../../tournament_settings.php');
+require_once('tournament_settings.php');
 
-require '../libs/Smarty.class.php';
+require 'vendor/autoload.php';
 
 $smarty = new Smarty;
 

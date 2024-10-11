@@ -17,8 +17,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
-require_once('../../tournament_settings.php');
-require '../libs/Smarty.class.php';
+require_once('tournament_settings.php');
+require 'libs/Smarty.class.php';
 $smarty = new Smarty;
 require 'loginlogout.php';
 

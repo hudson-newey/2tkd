@@ -16,8 +16,8 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
-require_once('../simpletest/reporter.php');
-require_once('../simpletest/web_tester.php');
+require_once('simpletest/reporter.php');
+require_once('simpletest/web_tester.php');
 
 class MATSTests extends WebTestCase{
   function userLogin($name1,$pass1){
